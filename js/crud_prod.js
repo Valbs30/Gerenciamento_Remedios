@@ -1,6 +1,7 @@
 document.querySelector("#salvar").addEventListener("click", cadastrar_prod)
 
 let produtos = []
+let edit_prod = false
 
 window.addEventListener("load", () => {
     produtos = JSON.parse(localStorage.getItem("produtos")) || []
@@ -34,19 +35,31 @@ function cadastrar_prod(){
     const nome_prod = document.querySelector("#nome_prod").value
     const descricao = document.querySelector("#descricao").value
     const categoria = document.querySelector("#categoria").value
+    const id_prod = document.querySelector("#id_prod").value
     const modal = bootstrap.Modal.getInstance(document.querySelector("#exampleModal1"))
 
     const produto = {
         id_prod: Date.now(),
-        nome_prod: nome_prod,//ou somente nome, nomevariavel: nomevariavel
+        nome_prod: nome_prod,
         descricao,
         categoria: categoria
     }
     
     if (!validar_prod(produto.nome_prod, document.querySelector("#nome_prod"))) return
     if (!validar_prod(produto.descricao, document.querySelector("#descricao"))) return
+  
+    if (edit_prod == true){
+        let produtoEdita = produtos.find((produto) => {
+            return produto.id_prod == id_prod
+        })
+        produtoEdita.nome_prod = document.querySelector("#nome_prod").value
+        produtoEdita.descricao = document.querySelector("#descricao").value
+        produtoEdita.categoria = document.querySelector("#categoria").value
 
-    produtos.push(produto)
+        edit_prod = false
+    }else{
+        produtos.push(produto)
+    }
 
     atualizar_prod()
 
@@ -65,6 +78,17 @@ function validar_prod(valor, campo){
     campo.classList.add("is-valid")
     return true
 
+}
+
+function editar_prod(id_prod){
+    const produto = produtos.find((produto) => produto.id_prod == id_prod)
+
+    document.querySelector("#nome_prod").value = produto.nome_prod
+    document.querySelector("#descricao").value = produto.descricao
+    document.querySelector("#categoria").value = produto.categoria
+    document.querySelector("#id_prod").value = produto.id_prod
+
+    edit_prod = true
 }
 
 function apagar_prod(id_prod){
@@ -87,7 +111,7 @@ function createCard_prod(produto){
                     <p>
                         <span class="badge text-bg-info">${produto.categoria}</span>
                     </p>
-                    <a href="#" class="btn btn-primary" title="Editar produto">
+                    <a onClick="editar_prod(${produto.id_prod})" href="#" class="btn btn-primary" title="Editar produto"  data-bs-toggle="modal" data-bs-target="#exampleModal1">
                         <i class="bi bi-pencil"></i>
                     </a>
                     <a onClick="apagar_prod(${produto.id_prod})" href="#" class="btn btn-danger" title="Apagar produto">

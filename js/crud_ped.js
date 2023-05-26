@@ -1,6 +1,7 @@
 document.querySelector("#salvar1").addEventListener("click", cadastrar_ped)
 
 let pedidos = []
+let edit_ped = false
 
 window.addEventListener("load", () => {
     pedidos = JSON.parse(localStorage.getItem("pedidos")) || []
@@ -33,6 +34,7 @@ function atualizar_ped(){
 function cadastrar_ped(){
     const produto_ped = document.querySelector("#prod_ped").value
     const quantidade = document.querySelector("#quantidade").value
+    const id_ped = document.querySelector("#id_ped").value
     const modal2 = bootstrap.Modal.getInstance(document.querySelector("#exampleModal2"))
 
     const pedido = {
@@ -45,7 +47,17 @@ function cadastrar_ped(){
     if (!validar_ped(pedido.produto_ped, document.querySelector("#prod_ped"))) return
     if (!validar_ped(pedido.quantidade, document.querySelector("#quantidade"))) return
 
-    pedidos.push(pedido)
+    if (edit_ped == true){
+        let pedidoEdita = pedidos.find((pedido) => {
+            return pedido.id_ped == id_ped
+        })
+        pedidoEdita.produto_ped = document.querySelector("#prod_ped").value
+        pedidoEdita.quantidade = document.querySelector("#quantidade").value
+
+        edit_ped = false
+    }else{
+        pedidos.push(pedido)
+    }
 
     atualizar_ped()
 
@@ -66,6 +78,16 @@ function validar_ped(valor, campo){
 
 }
 
+function editar_ped(id_ped){
+    const pedido = pedidos.find((pedido) => pedido.id_ped == id_ped)
+
+    document.querySelector("#prod_ped").value = pedido.produto_ped
+    document.querySelector("#quantidade").value = pedido.quantidade
+    document.querySelector("#id_ped").value = pedido.id_ped
+
+    edit_ped = true
+}
+
 function apagar_ped(id_ped){
     
     pedidos = pedidos.filter((pedido) => {
@@ -80,7 +102,6 @@ function concluir_ped(id_ped){
     })
     pedidoEncontrado.concluido_ped = true
     atualizar_ped()
-
 }
 
 function createCard_ped(pedido){
@@ -97,7 +118,7 @@ function createCard_ped(pedido){
                     <a onClick="concluir_ped(${pedido.id_ped})" href="#" class="btn btn-success ${disabled}" title="Concluir pedido">
                         <i class="bi bi-check-lg"></i>
                     </a>
-                    <a href="#" class="btn btn-primary" title="Editar pedido">
+                    <a onClick="editar_ped(${pedido.id_ped})" href="#" class="btn btn-primary" title="Editar pedido" data-bs-toggle="modal" data-bs-target="#exampleModal2">
                         <i class="bi bi-pencil"></i>
                     </a>
                     <a onClick="apagar_ped(${pedido.id_ped})" href="#" class="btn btn-danger" title="Apagar pedido">
